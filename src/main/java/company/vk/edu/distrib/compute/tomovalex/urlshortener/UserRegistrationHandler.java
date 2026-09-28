@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 final class UserRegistrationHandler implements HttpHandler {
     static final String PATH = "/internal/users";
+    private static final String POST = "POST";
 
     private final Dao<String> usersDao;
 
@@ -24,7 +25,7 @@ final class UserRegistrationHandler implements HttpHandler {
                 exchange.sendResponseHeaders(404, -1);
                 return;
             }
-            if (!"POST".equals(exchange.getRequestMethod())) {
+            if (!POST.equals(exchange.getRequestMethod())) {
                 exchange.sendResponseHeaders(405, -1);
                 return;
             }

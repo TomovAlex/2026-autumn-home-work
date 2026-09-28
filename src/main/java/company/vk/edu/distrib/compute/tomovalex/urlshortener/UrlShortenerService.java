@@ -14,6 +14,11 @@ import java.util.Random;
 
 public class UrlShortenerService implements company.vk.edu.distrib.compute.urlshortener.UrlShortenerService {
     private static final String ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private static final String GET = "GET";
+    private static final String POST = "POST";
+    private static final String PUT = "PUT";
+    private static final String DELETE = "DELETE";
+    private static final String STATUS_PATH = "/v0/status";
     private static final String LINKS_PATH = "/v0/links";
     private static final int ID_LEN = 10;
     private static final Random RND = new Random();
@@ -28,7 +33,7 @@ public class UrlShortenerService implements company.vk.edu.distrib.compute.urlsh
         this.linksDao = linksDao;
         this.authentication = new BasicAuthentication(usersDao);
         this.server = HttpServer.create(new InetSocketAddress(port), 0);
-        server.createContext("/v0/status", this::handleStatus);
+        server.createContext(STATUS_PATH, this::handleStatus);
         server.createContext(LINKS_PATH, this::handleLinks);
         server.createContext(UserRegistrationHandler.PATH, new UserRegistrationHandler(usersDao));
         server.createContext("/", this::handleRedirect);
@@ -45,11 +50,11 @@ public class UrlShortenerService implements company.vk.edu.distrib.compute.urlsh
     }
 
     private void handleStatus(HttpExchange exchange) throws IOException {
-        if (!"/v0/status".equals(exchange.getRequestURI().getPath())) {
+        if (!STATUS_PATH.equals(exchange.getRequestURI().getPath())) {
             sendEmptyResponse(exchange, 404);
             return;
         }
-        if (!"GET".equals(exchange.getRequestMethod())) {
+        if (!GET.equals(exchange.getRequestMethod())) {
             sendEmptyResponse(exchange, 405);
             return;
         }
@@ -63,10 +68,10 @@ public class UrlShortenerService implements company.vk.edu.distrib.compute.urlsh
         }
 
         switch (exchange.getRequestMethod()) {
-            case "GET" -> handleGetLink(exchange);
-            case "POST" -> handleCreateLink(exchange);
-            case "PUT" -> handleUpdateLink(exchange);
-            case "DELETE" -> handleDeleteLink(exchange);
+            case GET -> handleGetLink(exchange);
+            case POST -> handleCreateLink(exchange);
+            case PUT -> handleUpdateLink(exchange);
+            case DELETE -> handleDeleteLink(exchange);
             default -> sendEmptyResponse(exchange, 404);
         }
     }
@@ -133,7 +138,7 @@ public class UrlShortenerService implements company.vk.edu.distrib.compute.urlsh
     }
 
     private void handleRedirect(HttpExchange exchange) throws IOException {
-        if (!"GET".equals(exchange.getRequestMethod())) {
+        if (!GET.equals(exchange.getRequestMethod())) {
             if (!authentication.authenticate(exchange)) {
                 return;
             }
