@@ -76,24 +76,28 @@ public class KVService implements company.vk.edu.distrib.compute.kv.KVService {
                 return;
             }
 
-            switch (exchange.getRequestMethod()) {
-                case GET -> sendResponse(exchange, dao.get(id));
-                case PUT -> {
-                    dao.upsert(id, exchange.getRequestBody().readAllBytes());
-                    sendEmptyResponse(exchange, 201);
-                }
-                case DELETE -> {
-                    dao.delete(id);
-                    sendEmptyResponse(exchange, 202);
-                }
-                default -> sendEmptyResponse(exchange, 405);
-            }
+            handleEntityMethod(exchange, id);
         } catch (NoSuchElementException e) {
             sendEmptyResponse(exchange, 404);
         } catch (IllegalArgumentException e) {
             sendEmptyResponse(exchange, 400);
         } catch (IOException e) {
             sendEmptyResponse(exchange, 500);
+        }
+    }
+
+    private void handleEntityMethod(HttpExchange exchange, String id) throws IOException {
+        switch (exchange.getRequestMethod()) {
+            case GET -> sendResponse(exchange, dao.get(id));
+            case PUT -> {
+                dao.upsert(id, exchange.getRequestBody().readAllBytes());
+                sendEmptyResponse(exchange, 201);
+            }
+            case DELETE -> {
+                dao.delete(id);
+                sendEmptyResponse(exchange, 202);
+            }
+            default -> sendEmptyResponse(exchange, 405);
         }
     }
 

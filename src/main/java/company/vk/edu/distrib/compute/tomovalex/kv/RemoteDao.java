@@ -14,6 +14,8 @@ import java.util.NoSuchElementException;
 
 public class RemoteDao implements Dao<String> {
     private static final Duration TIMEOUT = Duration.ofSeconds(5);
+    private static final int NOT_FOUND = 404;
+    private static final int BAD_REQUEST = 400;
 
     private final String entityUrl;
     private final HttpClient client;
@@ -27,7 +29,7 @@ public class RemoteDao implements Dao<String> {
     public String get(String key) throws IOException {
         HttpRequest request = requestBuilder(key).GET().build();
         HttpResponse<byte[]> response = send(request);
-        if (response.statusCode() == 404) {
+        if (response.statusCode() == NOT_FOUND) {
             throw new NoSuchElementException(key);
         }
         checkStatus(response, 200);
@@ -73,7 +75,7 @@ public class RemoteDao implements Dao<String> {
     }
 
     private static void checkStatus(HttpResponse<byte[]> response, int expected) throws IOException {
-        if (response.statusCode() == 400) {
+        if (response.statusCode() == BAD_REQUEST) {
             throw new IllegalArgumentException("Invalid request");
         }
         if (response.statusCode() != expected) {
