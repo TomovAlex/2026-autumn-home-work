@@ -12,6 +12,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ClusterDao implements Dao<String> {
+    private static final int MIN_PORT = 1;
+    private static final int MAX_PORT = 65535;
+
     private final List<RemoteDao> nodes = new ArrayList<>();
 
     public ClusterDao(int... ports) {
@@ -19,7 +22,7 @@ public class ClusterDao implements Dao<String> {
             throw new IllegalArgumentException();
         }
         for (int port : ports) {
-            if (port < 1 || port > 65535) {
+            if (port < MIN_PORT || port > MAX_PORT) {
                 throw new IllegalArgumentException("Invalid port: " + port);
             }
         }
