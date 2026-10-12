@@ -18,14 +18,7 @@ public class ClusterDao implements Dao<String> {
     private final List<RemoteDao> nodes = new ArrayList<>();
 
     public ClusterDao(int... ports) {
-        if (ports == null || ports.length == 0) {
-            throw new IllegalArgumentException();
-        }
-        for (int port : ports) {
-            if (port < MIN_PORT || port > MAX_PORT) {
-                throw new IllegalArgumentException("Invalid port: " + port);
-            }
-        }
+        validatePorts(ports);
         int[] sortedPorts = ports.clone();
         Arrays.sort(sortedPorts);
         for (int i = 0; i < sortedPorts.length; i++) {
@@ -33,6 +26,17 @@ public class ClusterDao implements Dao<String> {
                 continue;
             }
             nodes.add(new RemoteDao(sortedPorts[i]));
+        }
+    }
+
+    private static void validatePorts(int... ports) {
+        if (ports == null || ports.length == 0) {
+            throw new IllegalArgumentException();
+        }
+        for (int port : ports) {
+            if (port < MIN_PORT || port > MAX_PORT) {
+                throw new IllegalArgumentException("Invalid port: " + port);
+            }
         }
     }
 
