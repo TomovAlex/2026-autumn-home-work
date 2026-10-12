@@ -17,12 +17,18 @@ public class RemoteDao implements Dao<String> {
     private static final int NOT_FOUND = 404;
     private static final int BAD_REQUEST = 400;
 
+    private final int port;
     private final String entityUrl;
     private final HttpClient client;
 
     public RemoteDao(int port) {
+        this.port = port;
         this.entityUrl = "http://localhost:" + port + "/v0/entity?id=";
         this.client = HttpClient.newBuilder().connectTimeout(TIMEOUT).build();
+    }
+
+    int getPort() {
+        return port;
     }
 
     @Override
