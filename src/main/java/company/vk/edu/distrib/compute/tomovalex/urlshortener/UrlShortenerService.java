@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.BufferOverflowException;
 import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -67,12 +68,16 @@ public class UrlShortenerService implements company.vk.edu.distrib.compute.urlsh
             return;
         }
 
-        switch (exchange.getRequestMethod()) {
-            case GET -> handleGetLink(exchange);
-            case POST -> handleCreateLink(exchange);
-            case PUT -> handleUpdateLink(exchange);
-            case DELETE -> handleDeleteLink(exchange);
-            default -> sendEmptyResponse(exchange, 404);
+        try {
+            switch (exchange.getRequestMethod()) {
+                case GET -> handleGetLink(exchange);
+                case POST -> handleCreateLink(exchange);
+                case PUT -> handleUpdateLink(exchange);
+                case DELETE -> handleDeleteLink(exchange);
+                default -> sendEmptyResponse(exchange, 404);
+            }
+        } catch (BufferOverflowException e) {
+            sendEmptyResponse(exchange, 413);
         }
     }
 
@@ -95,7 +100,7 @@ public class UrlShortenerService implements company.vk.edu.distrib.compute.urlsh
             return;
         }
 
-        String url = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        String url = RequestBodyUtils.read(exchange.getRequestBody());
         if (!isValidUrl(url)) {
             sendEmptyResponse(exchange, 422);
             return;
@@ -112,7 +117,7 @@ public class UrlShortenerService implements company.vk.edu.distrib.compute.urlsh
             return;
         }
 
-        String url = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        String url = RequestBodyUtils.read(exchange.getRequestBody());
         if (!isValidUrl(url)) {
             sendEmptyResponse(exchange, 422);
             return;
