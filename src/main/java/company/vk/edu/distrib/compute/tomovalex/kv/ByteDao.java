@@ -7,9 +7,11 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.NoSuchElementException;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ByteDao implements Dao<byte[]> {
     private final Path directory;
+    private final ReentrantLock lock = new ReentrantLock();
 
     public ByteDao(Path directory) throws IOException {
         this.directory = directory;
@@ -17,27 +19,41 @@ public class ByteDao implements Dao<byte[]> {
     }
 
     @Override
-    public synchronized byte[] get(String key) throws IOException {
+    public byte[] get(String key) throws IOException {
         Path file = generatePathForKey(key);
+        lock.lock();
         try {
             return Files.readAllBytes(file);
         } catch (NoSuchFileException e) {
             throw new NoSuchElementException(key, e);
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
-    public synchronized void upsert(String key, byte[] value) throws IOException {
+    public void upsert(String key, byte[] value) throws IOException {
         Path file = generatePathForKey(key);
         if (value == null) {
             throw new IllegalArgumentException();
         }
-        Files.write(file, value);
+        lock.lock();
+        try {
+            Files.write(file, value);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
-    public synchronized void delete(String key) throws IOException {
-        Files.deleteIfExists(generatePathForKey(key));
+    public void delete(String key) throws IOException {
+        Path file = generatePathForKey(key);
+        lock.lock();
+        try {
+            Files.deleteIfExists(file);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override

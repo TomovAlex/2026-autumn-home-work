@@ -12,9 +12,9 @@ public class ClusterDao implements Dao<String> {
 
     public ClusterDao(int... ports) {
         this.replicaSelector = new ReplicaSelector(ports);
-        for (int port : replicaSelector.getPorts()) {
-            nodes.put(port, new RemoteDao(port));
-        }
+        replicaSelector.getPorts().stream()
+            .map(RemoteDao::new)
+            .forEach(node -> nodes.put(node.getPort(), node));
     }
 
     @Override
