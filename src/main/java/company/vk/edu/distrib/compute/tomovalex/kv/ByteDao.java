@@ -17,7 +17,7 @@ public class ByteDao implements Dao<byte[]> {
     }
 
     @Override
-    public byte[] get(String key) throws IOException {
+    public synchronized byte[] get(String key) throws IOException {
         Path file = generatePathForKey(key);
         try {
             return Files.readAllBytes(file);
@@ -27,7 +27,7 @@ public class ByteDao implements Dao<byte[]> {
     }
 
     @Override
-    public void upsert(String key, byte[] value) throws IOException {
+    public synchronized void upsert(String key, byte[] value) throws IOException {
         Path file = generatePathForKey(key);
         if (value == null) {
             throw new IllegalArgumentException();
@@ -36,7 +36,7 @@ public class ByteDao implements Dao<byte[]> {
     }
 
     @Override
-    public void delete(String key) throws IOException {
+    public synchronized void delete(String key) throws IOException {
         Files.deleteIfExists(generatePathForKey(key));
     }
 
