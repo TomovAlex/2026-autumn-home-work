@@ -112,6 +112,8 @@ public class KVService implements company.vk.edu.distrib.compute.kv.KVService {
             handleEntityMethod(exchange, id, replicas, ack);
         } catch (IllegalArgumentException e) {
             sendEmptyResponse(exchange, 400);
+        } catch (IOException e) {
+            sendEmptyResponse(exchange, 500);
         }
     }
 
